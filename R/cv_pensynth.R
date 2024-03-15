@@ -9,13 +9,14 @@
 #' @param v `N_covars vector` of variable weights
 #' @param Z1 `N_targets by 1 matrix` of treated unit hold-out outcome
 #' @param Z0 `N_targets by N_donors matrix` of donor unit hold-out outcome
-#' @param nlambda `integer` length of lambda sequence (see details)
+#' @param lseq `float` sequence of lambda values to test, with default determined by data (see details)
 #' @param opt_pars `clarabel` settings using [clarabel::clarabel_control()]
 #' @param standardize `boolean` whether to standardize the input matrices (default TRUE)
 #' @param return_solver_info `boolean` whether to return diagnostic information concerning solver (default FALSE)
 #'
 #' @details The lambda sequence is an exponentially increasing sequence where
-#' The minimum lambda is always 1e-7, the max lambda is determined by the data.
+#' If lseq is left NULL, 100 lambda values will be generated, where the minimum
+#' lambda will always be 1e-11, and the maximum lambda will be determined by the data.
 #'
 #' @return A list of the lambda sequence, the associated weights, and the mses. If
 #' `return_solver_info` is `TRUE`, the list will also contain diagnostic information about
@@ -44,7 +45,7 @@
 #' plot_path(res)
 #'
 #' @export
-cv_pensynth <- function(X1, X0, v, Z1, Z0, nlambda = 100, opt_pars = clarabel::clarabel_control(), standardize = TRUE,
+cv_pensynth <- function(X1, X0, v, Z1, Z0, lseq = NULL, opt_pars = clarabel::clarabel_control(), standardize = TRUE,
                         return_solver_info = FALSE) {
   if (standardize) {
     st <- standardize_X(X1, X0)
@@ -59,7 +60,10 @@ cv_pensynth <- function(X1, X0, v, Z1, Z0, nlambda = 100, opt_pars = clarabel::c
   X1VX0 <- crossprod(X1v, X0v)
   Delta <- apply(X0v - c(X1v), 2, crossprod)
 
-  lseq <- lambda_sequence(X1VX0, Delta, nlambda)
+  if (is.null(lseq)) {
+      nlambda <- 100
+      lseq <- lambda_sequence(X1VX0, Delta, nlambda)
+  }
 
   # Constraint matrices
   Amat <- rbind(

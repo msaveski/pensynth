@@ -10,7 +10,7 @@ cv_pensynth(
   v,
   Z1,
   Z0,
-  nlambda = 100,
+  lseq = NULL,
   opt_pars = clarabel::clarabel_control(),
   standardize = TRUE,
   return_solver_info = FALSE
@@ -27,7 +27,7 @@ cv_pensynth(
 
 \item{Z0}{\verb{N_targets by N_donors matrix} of donor unit hold-out outcome}
 
-\item{nlambda}{\code{integer} length of lambda sequence (see details)}
+\item{lseq}{\code{float} sequence of lambda values to test, with default determined by data (see details)}
 
 \item{opt_pars}{\code{clarabel} settings using \code{\link[clarabel:clarabel_control]{clarabel::clarabel_control()}}}
 
@@ -47,7 +47,8 @@ error on a hold-out set of pre-intervention outcome time-series.
 }
 \details{
 The lambda sequence is an exponentially increasing sequence where
-The minimum lambda is always 1e-7, the max lambda is determined by the data.
+If lseq is left NULL, 100 lambda values will be generated, where the minimum
+lambda will always be 1e-11, and the maximum lambda will be determined by the data.
 }
 \examples{
 set.seed(45)
