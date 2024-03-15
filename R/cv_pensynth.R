@@ -63,6 +63,8 @@ cv_pensynth <- function(X1, X0, v, Z1, Z0, lseq = NULL, opt_pars = clarabel::cla
   if (is.null(lseq)) {
       nlambda <- 100
       lseq <- lambda_sequence(X1VX0, Delta, nlambda)
+  } else {
+    nlambda <- length(lseq)
   }
 
   # Constraint matrices
