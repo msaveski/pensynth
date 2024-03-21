@@ -122,10 +122,10 @@ cv_pensynth <- function(X1, X0, v, Z1, Z0, lseq = NULL, opt_pars = clarabel::cla
   if (return_solver_info) {
     # Remove unneeded columns from the solver output matrix
     rows_to_drop <- c("x", "y", "s", "z")
-    solver_output <- solver_output[!rownames(solver_output) %in% rows_to_drop, ]
+    solver_output <- as.matrix(solver_output[!rownames(solver_output) %in% rows_to_drop, ])
 
     # Add each row from the solver output matrix to .Data
-    for (i in 1:nrow(solver_output)) {
+    for (i in seq_len(nrow(solver_output))) {
       row_name <- rownames(solver_output)[i]
       out_obj[[row_name]] <- unlist(solver_output[i, ])
     }
