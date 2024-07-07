@@ -108,24 +108,20 @@ pensynth <- function(X1, X0, v, lambda = 0, opt_pars = clarabel::clarabel_contro
 
   solver_output <- solve_qp(lambda)
 
-  # Extract weights
-  w_path <- do.call(cbind, solver_output["x", ])
-  colnames(w_path) <- lambda
-
 
   # Construct a list of outputs
   out_obj <- list(
-      w_opt    = w_path[,which.min(e_path)],
-      l_opt    = lseq[which.min(e_path)],
-      lseq     = lseq,
-      w_path   = w_path
+      w_opt    = solver_output[["x"]],
+      l_opt    = lambda,
+      lseq     = lambda,
+      w_path   = solver_output[["x"]]
   )
 
   # If we've been requested to return info about the solving process, do so
   if (return_solver_info) {
     # Remove unneeded columns from the solver output matrix
     rows_to_drop <- c("x", "y", "s", "z")
-    solver_output <- as.matrix(solver_output[!rownames(solver_output) %in% rows_to_drop, ])
+    solver_output <- as.matrix(solver_output[!names(solver_output) %in% rows_to_drop])
 
     # Add each row from the solver output matrix to .Data
     for (i in seq_len(nrow(solver_output))) {
