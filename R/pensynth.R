@@ -82,24 +82,63 @@ pensynth <- function(X1, X0, v, lambda = 0, opt_pars = clarabel::clarabel_contro
     rep(0, N_donors) # Individ. weights gte 0 constraint
   )
 
-# Run the quadratic program solver
-  result <- clarabel::clarabel(
-    P = X0VX0,
-    q = -X1VX0 + lambda*Delta,
-    A = Amat,
-    b = B,
-    cones = list(
-      z = 1L, # There are 1 equalities
-      l = N_donors # There are N_donors * 2 inequalities
-    ),
-    control = opt_pars
+  # Define function for solving qp for a given lambda
+  solve_qp <- function(lambda) {
+    # run the quadratic program solver
+    result <- clarabel::clarabel(
+      P = X0VX0,
+      q = -X1VX0 + lambda*Delta,
+      A = Amat,
+      b = B,
+      cones = list(
+        z = 1L, # There is 1 equality
+        l = N_donors # There are N_donors inequalities
+      ),
+      control = opt_pars
+    )
+
+    # clarabel only returns a numeric status code, so we'll add a
+    # human-readable status column here (plus a description)
+    result$status_description <- clarabel::solver_status_descriptions()[result$status][[1]]
+    result$status <- names(clarabel::solver_status_descriptions()[result$status])
+
+    # Return result
+    return(result)
+  }
+
+  solver_output <- solve_qp(lambda)
+
+  # Extract weights
+  w_path <- do.call(cbind, solver_output["x", ])
+  colnames(w_path) <- lambda
+
+
+  # Construct a list of outputs
+  out_obj <- list(
+      w_opt    = w_path[,which.min(e_path)],
+      l_opt    = lseq[which.min(e_path)],
+      lseq     = lseq,
+      w_path   = w_path
   )
 
-  # clarabel only returns a numeric status code, so we'll add a
-  # human-readable status column here (plus a description)
-  result$status_description <- clarabel::solver_status_descriptions()[result$status][[1]]
-  result$status <- names(clarabel::solver_status_descriptions()[result$status])
+  # If we've been requested to return info about the solving process, do so
+  if (return_solver_info) {
+    # Remove unneeded columns from the solver output matrix
+    rows_to_drop <- c("x", "y", "s", "z")
+    solver_output <- as.matrix(solver_output[!rownames(solver_output) %in% rows_to_drop, ])
 
+    # Add each row from the solver output matrix to .Data
+    for (i in seq_len(nrow(solver_output))) {
+      row_name <- rownames(solver_output)[i]
+      out_obj[[row_name]] <- unlist(solver_output[i, ])
+    }
+  }
 
-  return(list(w = result$x, solution = result))
+  # Convert the list to a cvpensynth object
+  out_obj <- structure(
+    .Data = out_obj,
+    class = "pensynth"
+  )
+
+  return(out_obj)
 }
