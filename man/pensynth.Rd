@@ -9,6 +9,7 @@ pensynth(
   X0,
   v,
   lambda = 0,
+  return_solver_info = TRUE,
   opt_pars = clarabel::clarabel_control(),
   standardize = TRUE
 )

@@ -111,10 +111,10 @@ pensynth <- function(X1, X0, v, lambda = 0, return_solver_info= TRUE, opt_pars =
 
   # Construct a list of outputs
   out_obj <- list(
-      w_opt    = solver_output[["x"]],
+      w_opt    = as.matrix(solver_output[["x"]]),
       l_opt    = lambda,
       lseq     = lambda,
-      w_path   = solver_output[["x"]]
+      w_path   = as.matrix(solver_output[["x"]])
   )
 
   # If we've been requested to return info about the solving process, do so
