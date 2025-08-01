@@ -84,9 +84,12 @@ pensynth <- function(X1, X0, v, lambda = 0, return_solver_info= TRUE, opt_pars =
 
   # Define function for solving qp for a given lambda
   solve_qp <- function(lambda) {
+    delta <- 1e-6
+    P_reg <- X0VX0 + Matrix::Diagonal(n = N_donors, x = delta)
+
     # run the quadratic program solver
     result <- clarabel::clarabel(
-      P = X0VX0,
+      P = P_reg,
       q = -X1VX0 + lambda*Delta,
       A = Amat,
       b = B,
