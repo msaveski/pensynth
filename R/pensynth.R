@@ -62,6 +62,7 @@ pensynth <- function(X1, X0, v, lambda = 0, return_solver_info= TRUE, opt_pars =
     X0 <- st$X0
     X1 <- st$X1
   }
+  cat("pensynth", "\n")  
   N_donors <- ncol(X0)
   X0v <- X0*sqrt(v)
   X1v <- X1*sqrt(v)
@@ -86,7 +87,7 @@ pensynth <- function(X1, X0, v, lambda = 0, return_solver_info= TRUE, opt_pars =
   solve_qp <- function(lambda) {
     cat("Regularization: 1e-6", "\n")  
     delta <- 1e-6
-    P_reg <- X0VX0 + Matrix::Diagonal(n = N_donors, x = delta)
+    P_reg <- X0VX0 + diag(delta, nrow = N_donors, ncol = N_donors)
   
     # run the quadratic program solver
     result <- clarabel::clarabel(
